@@ -117,9 +117,9 @@ function App() {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showVoiceButton, setShowVoiceButton] = useState(false);
-  const [isApiKeySet] = useState(true); // Set to true since we're pre-configuring the API key
+  const [isApiKeySet] = useState(true);
   
-  // Get API key from environment variable
+  // Get API key from environment variable with fallback
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyDlQ8TkKQERzgf3deXT_-0lGiIubd-FWNQ";
   
   const chatMessagesRef = useRef<HTMLDivElement>(null);
@@ -130,6 +130,13 @@ function App() {
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const onelinerRef = useRef<HTMLParagraphElement>(null);
   const socialRef = useRef<HTMLDivElement>(null);
+
+  // Debug API key on component mount
+  useEffect(() => {
+    console.log('Environment variables:', import.meta.env);
+    console.log('API Key available:', !!apiKey);
+    console.log('API Key length:', apiKey.length);
+  }, []);
 
   // Improved scroll detection
   useEffect(() => {
@@ -224,8 +231,10 @@ function App() {
     setIsTyping(true);
 
     try {
+      console.log('Starting message handling...');
       console.log('API Key available:', !!apiKey);
       let response;
+      
       if (isApiKeySet && apiKey) {
         console.log('Using Gemini API...');
         response = await fetchGeminiResponse(inputValue);
@@ -234,12 +243,14 @@ function App() {
         response = generateLocalResponse(inputValue);
       }
       
+      console.log('Response received:', response);
+      
       setTimeout(() => {
         setMessages(prev => [...prev, { text: response, sender: 'ai' }]);
         setIsTyping(false);
       }, 1000);
     } catch (error) {
-      console.error('Error generating response:', error);
+      console.error('Error in handleSendMessage:', error);
       setTimeout(() => {
         setMessages(prev => [...prev, { 
           text: "I'm having trouble connecting to my AI services. Let me answer based on what I know about Jay.", 
@@ -250,7 +261,6 @@ function App() {
     }
   };
 
-  // Gemini API integration with pre-configured key
   const fetchGeminiResponse = async (userInput: string) => {
     try {
       console.log('Attempting to fetch Gemini response...');
@@ -289,25 +299,31 @@ function App() {
         - If asked about availability or contact, mention being open to opportunities and provide email
       `;
       
+      const requestBody = {
+        contents: [
+          {
+            parts: [
+              { text: context }
+            ]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 800,
+        }
+      };
+
+      console.log('Making API request to Gemini...');
+      console.log('Request URL:', `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`);
+      console.log('Request body:', JSON.stringify(requestBody, null, 2));
+      
       // Make actual API call to Gemini
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                { text: context }
-              ]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 800,
-          }
-        })
+        body: JSON.stringify(requestBody)
       });
       
       if (!response.ok) {
