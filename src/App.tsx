@@ -137,8 +137,8 @@ function App() {
       const currentScrollY = window.scrollY;
       setScrollY(currentScrollY);
       
-      // Show chat when scrolled past 25% of the viewport height for better trigger sensitivity
-      const triggerPoint = window.innerHeight * 0.25;
+      // Show chat when scrolled past 30% of the viewport height for better trigger sensitivity
+      const triggerPoint = window.innerHeight * 0.3;
       
       if (currentScrollY > triggerPoint) {
         if (!showChat) {
@@ -169,27 +169,14 @@ function App() {
       }
     };
 
-    // Add event listeners with passive option for better performance
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('wheel', handleScroll, { passive: true });
-    window.addEventListener('touchmove', handleScroll, { passive: true });
+    window.addEventListener('scroll', handleScroll);
     
-    // Add initial scroll instruction
+    // Add initial scroll instruction for mobile users
     const initialScrollTimeout = setTimeout(() => {
       if (!showChat && window.scrollY < 10) {
         const scrollIndicator = document.createElement('div');
         scrollIndicator.className = 'scroll-indicator';
         scrollIndicator.innerHTML = '↓ Scroll down to chat ↓';
-        scrollIndicator.style.cursor = 'pointer';
-        
-        // Add click handler as fallback
-        scrollIndicator.addEventListener('click', () => {
-          window.scrollTo({
-            top: window.innerHeight * 0.25,
-            behavior: 'smooth'
-          });
-        });
-        
         document.body.appendChild(scrollIndicator);
         
         setTimeout(() => {
@@ -207,8 +194,6 @@ function App() {
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('wheel', handleScroll);
-      window.removeEventListener('touchmove', handleScroll);
       clearTimeout(initialScrollTimeout);
     };
   }, [showChat]);
@@ -224,10 +209,7 @@ function App() {
   useEffect(() => {
     if (showChat && chatSectionRef.current) {
       setTimeout(() => {
-        chatSectionRef.current?.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'start'
-        });
+        chatSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 300);
     }
   }, [showChat]);
@@ -242,12 +224,13 @@ function App() {
     setIsTyping(true);
 
     try {
+      console.log('API Key available:', !!apiKey);
       let response;
-      if (isApiKeySet) {
-        // Use Gemini API with pre-configured key
+      if (isApiKeySet && apiKey) {
+        console.log('Using Gemini API...');
         response = await fetchGeminiResponse(inputValue);
       } else {
-        // Fallback to local response generation
+        console.log('Falling back to local response...');
         response = generateLocalResponse(inputValue);
       }
       
@@ -270,6 +253,8 @@ function App() {
   // Gemini API integration with pre-configured key
   const fetchGeminiResponse = async (userInput: string) => {
     try {
+      console.log('Attempting to fetch Gemini response...');
+      
       // Create context from resume and LinkedIn data
       const context = `
         User query: ${userInput}
@@ -305,11 +290,10 @@ function App() {
       `;
       
       // Make actual API call to Gemini
-      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           contents: [
@@ -327,11 +311,13 @@ function App() {
       });
       
       if (!response.ok) {
-        console.error('Gemini API error:', await response.text());
-        return generateLocalResponse(userInput);
+        const errorText = await response.text();
+        console.error('Gemini API error:', errorText);
+        throw new Error(`API error: ${errorText}`);
       }
       
       const data = await response.json();
+      console.log('Gemini API response:', data);
       
       // Check if we have a valid response
       if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
