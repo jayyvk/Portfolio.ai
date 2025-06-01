@@ -269,8 +269,6 @@ function App() {
   const fetchGeminiResponse = async (userInput: string) => {
     try {
       console.log('Attempting to fetch Gemini response...');
-      console.log('API Key available:', !!apiKey);
-      console.log('API Key length:', apiKey.length);
       
       // Create context from resume and LinkedIn data
       const context = `
@@ -306,52 +304,37 @@ function App() {
         - If asked about availability or contact, mention being open to opportunities and provide email
       `;
       
-      const requestBody = {
-        contents: [
-          {
-            parts: [
-              { text: context }
-            ]
-          }
-        ],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 800,
-        }
-      };
-
-      console.log('Making API request to Gemini...');
-      console.log('Request URL:', `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey.substring(0, 10)}...`);
-      console.log('Request body:', JSON.stringify(requestBody, null, 2));
+      console.log('Making API request to serverless endpoint...');
       
-      // Make actual API call to Gemini
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+      // Make request to our serverless API endpoint
+      const response = await fetch('/api/gemini', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify({
+          userInput,
+          context
+        })
       });
       
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Gemini API error:', errorText);
-        throw new Error(`API error: ${errorText}`);
+        const errorData = await response.json();
+        console.error('API error:', errorData);
+        throw new Error(errorData.error || 'API request failed');
       }
       
       const data = await response.json();
-      console.log('Gemini API response:', data);
+      console.log('API response:', data);
       
-      // Check if we have a valid response
-      if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
-        return data.candidates[0].content.parts[0].text;
+      if (data.response) {
+        return data.response;
       } else {
-        // Fallback to local response if API response format is unexpected
-        console.error('Unexpected Gemini API response format:', data);
+        console.error('Unexpected API response format:', data);
         return generateLocalResponse(userInput);
       }
     } catch (error) {
-      console.error('Error calling Gemini API:', error);
+      console.error('Error calling API:', error);
       return generateLocalResponse(userInput);
     }
   };
@@ -395,13 +378,117 @@ function App() {
             className="landing-content"
             style={{ 
               opacity: landingOpacity, 
-              transform: `translateY(${landingTranslateY}px)`
+              transform: `translateY(${landingTranslateY}px)`,
+              position: 'relative',
+              zIndex: 1
             }}
           >
-            {/* Rest of the component content */}
+            <h1 ref={nameRef} className="name landing-element name-element">jay kilaparthi.</h1>
+            <p ref={subtitleRef} className="subtitle landing-element subtitle-element">builder · ai · nyc</p>
+            <p ref={onelinerRef} className="one-liner landing-element oneliner-element">baruch msis → keeya → eazyforms.ai</p>
+            
+            <div ref={socialRef} className="social-links landing-element social-element">
+              <a href="https://linkedin.com/in/jayvk" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="LinkedIn">
+                <FaLinkedin size={24} />
+              </a>
+              <a href="https://github.com/jayakeerthk" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="GitHub">
+                <FaGithub size={24} />
+              </a>
+              <a href="mailto:jayakeerthk@gmail.com" className="social-link" aria-label="Email">
+                <FaEnvelope size={24} />
+              </a>
+              <a href="/assets/JayKilaparthi-Resume.pdf" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Resume">
+                <FaFileAlt size={24} />
+              </a>
+            </div>
           </motion.div>
         </div>
       </section>
+
+      <AnimatePresence>
+        {showChat && (
+          <motion.section 
+            ref={chatSectionRef}
+            className="chat-section"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
+            <div className="container">
+              <div className="chat-container">
+                <div className="chat-header">
+                  <h2>Chat with Jay's AI</h2>
+                </div>
+                <div className="chat-messages" ref={chatMessagesRef}>
+                  <AnimatePresence>
+                    {messages.map((message, index) => (
+                      <motion.div 
+                        key={index} 
+                        className={`message message-${message.sender}`}
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ duration: 0.3, delay: 0.1 * index }}
+                      >
+                        {message.text}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  
+                  {isTyping && (
+                    <motion.div 
+                      className="message message-ai"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                    >
+                      <div className="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+                <form onSubmit={handleSendMessage} className="chat-input">
+                  <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    placeholder="Ask me anything..."
+                    aria-label="Chat message input"
+                  />
+                  <motion.button 
+                    type="submit"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    aria-label="Send message"
+                  >
+                    <FaPaperPlane size={16} />
+                  </motion.button>
+                </form>
+              </div>
+            </div>
+          </motion.section>
+        )}
+      </AnimatePresence>
+      
+      <AnimatePresence>
+        {showVoiceButton && (
+          <motion.div 
+            className="voice-button"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            title="Voice feature coming soon"
+            aria-label="Voice interaction (coming soon)"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <FaMicrophone size={24} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
