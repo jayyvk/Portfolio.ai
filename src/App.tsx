@@ -241,7 +241,7 @@ function App() {
       let response;
       
       if (isApiKeySet && apiKey) {
-        console.log('Using Gemini API...');
+        console.log('Using OpenAI API...');
         response = await fetchGeminiResponse(inputValue);
       } else {
         console.log('Falling back to local response...');
@@ -268,12 +268,10 @@ function App() {
 
   const fetchGeminiResponse = async (userInput: string) => {
     try {
-      console.log('Attempting to fetch Gemini response...');
+      console.log('Attempting to fetch OpenAI response...');
       
       // Create context from resume and LinkedIn data
       const context = `
-        User query: ${userInput}
-        
         Resume information:
         ${resumeContext}
         
@@ -294,20 +292,12 @@ function App() {
         ${linkedInContext.profile.experience.map(exp => 
           `${exp.title} at ${exp.company} (${exp.date}) - ${exp.description}`
         ).join('\n')}
-        
-        Instructions:
-        - Respond as if you are Jay Kilaparthi's personal AI assistant
-        - Use first-person perspective ("I", "my", etc.) as if you are Jay
-        - Be professional but conversational in tone
-        - Keep responses concise but informative
-        - Only share information that's present in the resume or LinkedIn profile
-        - If asked about availability or contact, mention being open to opportunities and provide email
       `;
       
       console.log('Making API request to serverless endpoint...');
       
       // Make request to our serverless API endpoint
-      const response = await fetch('/api/gemini', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -360,7 +350,7 @@ function App() {
     } else if (input.includes('voice') || input.includes('speak') || input.includes('talk')) {
       return "Voice interaction is coming soon! In a future update, you'll be able to hold the microphone button to speak with me directly using ElevenLabs voice technology.";
     } else if (input.includes('api') || input.includes('gemini') || input.includes('key')) {
-      return "I'm already powered by Gemini AI! My responses are generated using Google's Gemini large language model with access to my resume and LinkedIn information for accurate and detailed answers.";
+      return "I'm already powered by OpenAI! My responses are generated using OpenAI's large language model with access to my resume and LinkedIn information for accurate and detailed answers.";
     } else {
       return "Thanks for your message! I'm Jay, a recent Baruch MSIS graduate based in NYC. I've co-founded AI startups and I'm passionate about product building. Is there something specific about my background or projects you'd like to know?";
     }
