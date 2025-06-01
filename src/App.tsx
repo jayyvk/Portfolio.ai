@@ -176,7 +176,23 @@ function App() {
       if (!showChat && window.scrollY < 10) {
         const scrollIndicator = document.createElement('div');
         scrollIndicator.className = 'scroll-indicator';
-        scrollIndicator.innerHTML = '↓ Scroll down to chat ↓';
+        scrollIndicator.innerHTML = '↓ Click to chat ↓';
+        scrollIndicator.style.cursor = 'pointer';
+        
+        // Add click handler to scroll to chat section
+        scrollIndicator.addEventListener('click', () => {
+          const chatSection = document.querySelector('.chat-section');
+          if (chatSection) {
+            chatSection.scrollIntoView({ behavior: 'smooth' });
+          } else {
+            // If chat section isn't rendered yet, scroll down to trigger it
+            window.scrollTo({
+              top: window.innerHeight * 0.3,
+              behavior: 'smooth'
+            });
+          }
+        });
+        
         document.body.appendChild(scrollIndicator);
         
         setTimeout(() => {
