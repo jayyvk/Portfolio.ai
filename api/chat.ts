@@ -1,6 +1,25 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import OpenAI from 'openai';
 
+// System prompt that defines the AI's behavior
+const SYSTEM_PROMPT = `You are Jay Kilaparthi's AI assistant. You are an AI Engineer and M.S. Information Systems graduate with experience building real-world applications powered by large language models.
+
+Key Information:
+- Currently working as an AI Engineer at Hello Inbox, building a voice-first AI assistant
+- Previously worked at Keeya, developing a generative AI voice memory platform
+- Technical Teaching Assistant for Python at Baruch College
+- M.S. in Information Systems from Baruch College (2024-2025)
+- Based in New York City
+- Open to new opportunities
+
+Instructions:
+- Respond in first person as if you are Jay
+- Be professional but conversational
+- Keep responses concise and informative
+- Only share information that's provided above
+- If asked about availability, mention being open to opportunities and provide email (jayakeerthk@gmail.com)
+- If asked about contact, provide email and LinkedIn (linkedin.com/in/jayvk)`;
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Only allow POST requests
   if (req.method !== 'POST') {
@@ -8,10 +27,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { userInput, context } = req.body;
+    const { message } = req.body;
 
-    if (!userInput) {
-      return res.status(400).json({ error: 'User input is required' });
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
     }
 
     const apiKey = process.env.OPENAI_API_KEY;
@@ -29,37 +48,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       messages: [
         {
           role: "system",
-          content: `You are Jay Kilaparthi's AI assistant. Use the following context to answer questions about Jay:
-          
-          ${context}
-          
-          Instructions:
-          - Respond as if you are Jay Kilaparthi's personal AI assistant
-          - Use first-person perspective ("I", "my", etc.) as if you are Jay
-          - Be professional but conversational in tone
-          - Keep responses concise but informative
-          - Only share information that's present in the resume or LinkedIn profile
-          - If asked about availability or contact, mention being open to opportunities and provide email`
+          content: SYSTEM_PROMPT
         },
         {
           role: "user",
-          content: userInput
+          content: message
         }
       ],
       temperature: 0.7,
-      max_tokens: 800
+      max_tokens: 500
     });
 
-    if (completion.choices[0]?.message?.content) {
-      return res.status(200).json({ 
-        response: completion.choices[0].message.content 
-      });
+    const response = completion.choices[0]?.message?.content;
+    
+    if (response) {
+      return res.status(200).json({ response });
     } else {
-      console.error('Unexpected OpenAI API response format:', completion);
-      return res.status(500).json({ error: 'Unexpected API response format' });
+      return res.status(500).json({ error: 'No response from AI' });
     }
   } catch (error) {
-    console.error('Error in OpenAI API handler:', error);
+    console.error('Error in chat API:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 } 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaLinkedin, FaGithub, FaEnvelope, FaFileAlt, FaMicrophone, FaPaperPlane } from 'react-icons/fa';
+import { FaLinkedin, FaGithub, FaEnvelope, FaFileAlt } from 'react-icons/fa';
+import Chat from './components/Chat';
 import './App.css';
 
 // Resume context from PDF for Gemini API
@@ -111,19 +112,6 @@ const linkedInContext = {
 function App() {
   const [scrollY, setScrollY] = useState(0);
   const [showChat, setShowChat] = useState(false);
-  const [messages, setMessages] = useState([
-    { text: "Hi, I'm Jay's AI. Ask me about his projects, background, or availability.", sender: 'ai' }
-  ]);
-  const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [showVoiceButton, setShowVoiceButton] = useState(false);
-  const [isApiKeySet] = useState(true);
-  
-  // Get API key from environment variable with fallback
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyDlQ8TkKQERzgf3deXT_-0lGiIubd-FWNQ";
-  
-  const chatMessagesRef = useRef<HTMLDivElement>(null);
-  const chatSectionRef = useRef<HTMLElement>(null);
   
   // References for each landing element
   const nameRef = useRef<HTMLHeadingElement>(null);
@@ -131,31 +119,18 @@ function App() {
   const onelinerRef = useRef<HTMLParagraphElement>(null);
   const socialRef = useRef<HTMLDivElement>(null);
 
-  // Debug API key on component mount
-  useEffect(() => {
-    console.log('Environment variables:', import.meta.env);
-    console.log('API Key available:', !!apiKey);
-    console.log('API Key length:', apiKey.length);
-    console.log('API Key first 10 chars:', apiKey.substring(0, 10) + '...');
-  }, []);
-
   // Improved scroll detection
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       setScrollY(currentScrollY);
       
-      // Show chat when scrolled past 30% of the viewport height for better trigger sensitivity
+      // Show chat when scrolled past 30% of the viewport height
       const triggerPoint = window.innerHeight * 0.3;
       
       if (currentScrollY > triggerPoint) {
         if (!showChat) {
           setShowChat(true);
-          
-          // Show voice button placeholder after chat appears
-          setTimeout(() => {
-            setShowVoiceButton(true);
-          }, 1000);
         }
         
         // Apply fall animation to landing elements
@@ -166,7 +141,6 @@ function App() {
       } else {
         if (showChat) {
           setShowChat(false);
-          setShowVoiceButton(false);
         }
         
         // Remove fall animation when scrolled back up
@@ -205,156 +179,6 @@ function App() {
       clearTimeout(initialScrollTimeout);
     };
   }, [showChat]);
-
-  // Scroll to bottom of chat when new messages are added
-  useEffect(() => {
-    if (chatMessagesRef.current) {
-      chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  // Force scroll to chat section when it first appears
-  useEffect(() => {
-    if (showChat && chatSectionRef.current) {
-      setTimeout(() => {
-        chatSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 300);
-    }
-  }, [showChat]);
-
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputValue.trim()) return;
-
-    // Add user message
-    setMessages([...messages, { text: inputValue, sender: 'user' }]);
-    setInputValue('');
-    setIsTyping(true);
-
-    try {
-      console.log('Starting message handling...');
-      console.log('Environment variables:', import.meta.env);
-      console.log('API Key available:', !!apiKey);
-      console.log('API Key length:', apiKey.length);
-      console.log('API Key first 10 chars:', apiKey.substring(0, 10) + '...');
-      
-      let response;
-      
-      if (isApiKeySet && apiKey) {
-        console.log('Using OpenAI API...');
-        response = await fetchGeminiResponse(inputValue);
-      } else {
-        console.log('Falling back to local response...');
-        response = generateLocalResponse(inputValue);
-      }
-      
-      console.log('Response received:', response);
-      
-      setTimeout(() => {
-        setMessages(prev => [...prev, { text: response, sender: 'ai' }]);
-        setIsTyping(false);
-      }, 1000);
-    } catch (error) {
-      console.error('Error in handleSendMessage:', error);
-      setTimeout(() => {
-        setMessages(prev => [...prev, { 
-          text: "I'm having trouble connecting to my AI services. Let me answer based on what I know about Jay.", 
-          sender: 'ai' 
-        }]);
-        setIsTyping(false);
-      }, 1000);
-    }
-  };
-
-  const fetchGeminiResponse = async (userInput: string) => {
-    try {
-      console.log('Attempting to fetch OpenAI response...');
-      
-      // Create context from resume and LinkedIn data
-      const context = `
-        Resume information:
-        ${resumeContext}
-        
-        LinkedIn profile:
-        Name: ${linkedInContext.profile.name}
-        Headline: ${linkedInContext.profile.headline}
-        Location: ${linkedInContext.profile.location}
-        About: ${linkedInContext.profile.about}
-        Open to work: ${linkedInContext.profile.openToWork ? 'Yes' : 'No'}
-        Skills: ${linkedInContext.profile.skills.join(', ')}
-        
-        Education:
-        ${linkedInContext.profile.education.map(edu => 
-          `${edu.school} - ${edu.degree} (${edu.date})`
-        ).join('\n')}
-        
-        Experience:
-        ${linkedInContext.profile.experience.map(exp => 
-          `${exp.title} at ${exp.company} (${exp.date}) - ${exp.description}`
-        ).join('\n')}
-      `;
-      
-      console.log('Making API request to serverless endpoint...');
-      
-      // Make request to our serverless API endpoint
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          userInput,
-          context
-        })
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('API error:', errorData);
-        throw new Error(errorData.error || 'API request failed');
-      }
-      
-      const data = await response.json();
-      console.log('API response:', data);
-      
-      if (data.response) {
-        return data.response;
-      } else {
-        console.error('Unexpected API response format:', data);
-        return generateLocalResponse(userInput);
-      }
-    } catch (error) {
-      console.error('Error calling API:', error);
-      return generateLocalResponse(userInput);
-    }
-  };
-
-  // Local response generation as fallback
-  const generateLocalResponse = (userInput: string) => {
-    const input = userInput.toLowerCase();
-    
-    if (input.includes('project') || input.includes('startup') || input.includes('work')) {
-      return "I've co-founded multiple AI startups including Keeya (a voice memory platform) and EazyForms.ai (an AI form assistant for international students). Currently, I'm working as an AI Engineer at Hello Inbox, building a voice-first AI assistant for email management. Previously at Keeya, I developed a generative AI voice memory platform using ElevenLabs and GPT-4.";
-    } else if (input.includes('background') || input.includes('education') || input.includes('experience')) {
-      return "I have an M.S. in Information Systems from Baruch College's Zicklin School of Business (2024-2025). My experience includes roles as an AI Engineer at Hello Inbox and Keeya, a Technical Teaching Assistant for Python at Baruch College, and a Growth & Data Lead at Patchly. I also worked as a Fundraising Analytics Manager at Make a Difference in India.";
-    } else if (input.includes('skill') || input.includes('tech') || input.includes('stack')) {
-      return "My technical skills include Python (Pandas, NumPy), SQL, JavaScript, HTML/CSS, and data wrangling. I'm experienced with cloud platforms like Supabase, Firebase, AWS, and Vercel. I'm proficient in data analysis tools including Power BI, Tableau, and Excel. My AI expertise includes prompt engineering, LLM integration, workflow automation, and working with GPT API, Whisper, and ElevenLabs.";
-    } else if (input.includes('available') || input.includes('hire') || input.includes('job') || input.includes('opportunity')) {
-      return "I'm currently based in NYC and open to full-time roles in data analytics, product analytics, or startup operations. Feel free to reach out via email at jayakeerthk@gmail.com or connect with me on LinkedIn at linkedin.com/in/jayvk to discuss opportunities!";
-    } else if (input.includes('contact') || input.includes('email') || input.includes('reach')) {
-      return "You can reach me at jayakeerthk@gmail.com or connect with me on LinkedIn at linkedin.com/in/jayvk.";
-    } else if (input.includes('hello') || input.includes('hi') || input.includes('hey')) {
-      return "Hey there! I'm Jay's AI assistant. I can tell you about my projects, skills, or availability. What would you like to know?";
-    } else if (input.includes('resume') || input.includes('cv')) {
-      return "You can view or download my resume by clicking the document icon in the top section of this page. It has details about my education, work experience, and projects.";
-    } else if (input.includes('voice') || input.includes('speak') || input.includes('talk')) {
-      return "Voice interaction is coming soon! In a future update, you'll be able to hold the microphone button to speak with me directly using ElevenLabs voice technology.";
-    } else if (input.includes('api') || input.includes('gemini') || input.includes('key')) {
-      return "I'm already powered by OpenAI! My responses are generated using OpenAI's large language model with access to my resume and LinkedIn information for accurate and detailed answers.";
-    } else {
-      return "Thanks for your message! I'm Jay, a recent Baruch MSIS graduate based in NYC. I've co-founded AI startups and I'm passionate about product building. Is there something specific about my background or projects you'd like to know?";
-    }
-  };
 
   // Calculate opacity and transform based on scroll position
   const landingOpacity = Math.max(0, 1 - scrollY / (window.innerHeight * 0.3));
@@ -398,7 +222,6 @@ function App() {
       <AnimatePresence>
         {showChat && (
           <motion.section 
-            ref={chatSectionRef}
             className="chat-section"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -406,77 +229,12 @@ function App() {
             transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
             <div className="container">
-              <div className="chat-container">
-                <div className="chat-header">
-                  <h2>Chat with Jay's AI</h2>
-                </div>
-                <div className="chat-messages" ref={chatMessagesRef}>
-                  <AnimatePresence>
-                    {messages.map((message, index) => (
-                      <motion.div 
-                        key={index} 
-                        className={`message message-${message.sender}`}
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{ duration: 0.3, delay: 0.1 * index }}
-                      >
-                        {message.text}
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                  
-                  {isTyping && (
-                    <motion.div 
-                      className="message message-ai"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                    >
-                      <div className="typing-indicator">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
-                <form onSubmit={handleSendMessage} className="chat-input">
-                  <input
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Ask me anything..."
-                    aria-label="Chat message input"
-                  />
-                  <motion.button 
-                    type="submit"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    aria-label="Send message"
-                  >
-                    <FaPaperPlane size={16} />
-                  </motion.button>
-                </form>
+              <div className="chat-header">
+                <h2>Chat with Jay's AI</h2>
               </div>
+              <Chat />
             </div>
           </motion.section>
-        )}
-      </AnimatePresence>
-      
-      <AnimatePresence>
-        {showVoiceButton && (
-          <motion.div 
-            className="voice-button"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            title="Voice feature coming soon"
-            aria-label="Voice interaction (coming soon)"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <FaMicrophone size={24} />
-          </motion.div>
         )}
       </AnimatePresence>
     </div>
