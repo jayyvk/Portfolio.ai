@@ -309,6 +309,10 @@ body {
   transform: scale(0.95);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* Scroll indicator */
 .scroll-indicator {
   position: fixed;
@@ -326,6 +330,8 @@ body {
   cursor: pointer;
   user-select: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .scroll-indicator:hover {
@@ -352,6 +358,13 @@ body {
   }
   100% {
     transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Ensure smooth scrolling on all devices */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
 }
 

@@ -137,8 +137,8 @@ function App() {
       const currentScrollY = window.scrollY;
       setScrollY(currentScrollY);
       
-      // Show chat when scrolled past 30% of the viewport height for better trigger sensitivity
-      const triggerPoint = window.innerHeight * 0.3;
+      // Show chat when scrolled past 25% of the viewport height for better trigger sensitivity
+      const triggerPoint = window.innerHeight * 0.25;
       
       if (currentScrollY > triggerPoint) {
         if (!showChat) {
@@ -169,28 +169,25 @@ function App() {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    // Add event listeners with passive option for better performance
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('wheel', handleScroll, { passive: true });
+    window.addEventListener('touchmove', handleScroll, { passive: true });
     
-    // Add initial scroll instruction for mobile users
+    // Add initial scroll instruction
     const initialScrollTimeout = setTimeout(() => {
       if (!showChat && window.scrollY < 10) {
         const scrollIndicator = document.createElement('div');
         scrollIndicator.className = 'scroll-indicator';
-        scrollIndicator.innerHTML = '↓ Click to chat ↓';
+        scrollIndicator.innerHTML = '↓ Scroll down to chat ↓';
         scrollIndicator.style.cursor = 'pointer';
         
-        // Add click handler to scroll to chat section
+        // Add click handler as fallback
         scrollIndicator.addEventListener('click', () => {
-          const chatSection = document.querySelector('.chat-section');
-          if (chatSection) {
-            chatSection.scrollIntoView({ behavior: 'smooth' });
-          } else {
-            // If chat section isn't rendered yet, scroll down to trigger it
-            window.scrollTo({
-              top: window.innerHeight * 0.3,
-              behavior: 'smooth'
-            });
-          }
+          window.scrollTo({
+            top: window.innerHeight * 0.25,
+            behavior: 'smooth'
+          });
         });
         
         document.body.appendChild(scrollIndicator);
@@ -210,6 +207,8 @@ function App() {
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('wheel', handleScroll);
+      window.removeEventListener('touchmove', handleScroll);
       clearTimeout(initialScrollTimeout);
     };
   }, [showChat]);
@@ -225,7 +224,10 @@ function App() {
   useEffect(() => {
     if (showChat && chatSectionRef.current) {
       setTimeout(() => {
-        chatSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+        chatSectionRef.current?.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
       }, 300);
     }
   }, [showChat]);
