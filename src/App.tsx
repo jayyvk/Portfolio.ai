@@ -119,8 +119,8 @@ function App() {
   const [showVoiceButton, setShowVoiceButton] = useState(false);
   const [isApiKeySet] = useState(true); // Set to true since we're pre-configuring the API key
   
-  // Pre-configured Gemini API key
-  const apiKey = "AIzaSyDlQ8TkKQERzgf3deXT_-0lGiIubd-FWNQ";
+  // Get API key from environment variable
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyDlQ8TkKQERzgf3deXT_-0lGiIubd-FWNQ";
   
   const chatMessagesRef = useRef<HTMLDivElement>(null);
   const chatSectionRef = useRef<HTMLElement>(null);
