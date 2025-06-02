@@ -125,8 +125,8 @@ function App() {
       const currentScrollY = window.scrollY;
       setScrollY(currentScrollY);
       
-      // Show chat when scrolled past 30% of the viewport height
-      const triggerPoint = window.innerHeight * 0.3;
+      // Calculate trigger point based on viewport height
+      const triggerPoint = Math.max(window.innerHeight * 0.3, 200); // Minimum 200px trigger
       
       if (currentScrollY > triggerPoint) {
         if (!showChat) {
@@ -151,9 +151,10 @@ function App() {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    // Add scroll event listener with passive option for better performance
+    window.addEventListener('scroll', handleScroll, { passive: true });
     
-    // Add initial scroll instruction for mobile users
+    // Add initial scroll instruction
     const initialScrollTimeout = setTimeout(() => {
       if (!showChat && window.scrollY < 10) {
         const scrollIndicator = document.createElement('div');
