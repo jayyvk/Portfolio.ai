@@ -111,7 +111,7 @@ function App() {
               <a href="mailto:jayakeerthk@gmail.com" className="social-link" aria-label="Email">
                 <FaEnvelope size={24} />
               </a>
-              <a href="/assets/JayKilaparthi-Resume.pdf" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Resume">
+              <a href="/JayKilaparthi-Resume.pdf" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Resume">
                 <FaFileAlt size={24} />
               </a>
             </div>
