@@ -130,10 +130,14 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
-  max-width: 100%;
+  max-width: 800px;
   margin: 0 auto;
   padding: 0;
   box-sizing: border-box;
+  background: var(--card-background);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .messages {
@@ -143,6 +147,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  max-height: 400px;
 }
 
 .message {
@@ -522,4 +527,12 @@ body {
     width: 45px;
     height: 45px;
   }
+}
+
+.chat-heading {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: var(--text);
 }

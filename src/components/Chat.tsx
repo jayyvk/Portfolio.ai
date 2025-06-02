@@ -8,7 +8,9 @@ interface Message {
 }
 
 const Chat: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    { text: "Hi! I'm Jay's AI assistant. Ask me anything about my background, projects, or availability.", sender: 'ai' }
+  ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -46,6 +48,7 @@ const Chat: React.FC = () => {
 
   return (
     <div className="chat-container">
+      <h2 className="chat-heading">Chat with Jay's AI</h2>
       <div className="messages">
         <AnimatePresence>
           {messages.map((message, index) => (

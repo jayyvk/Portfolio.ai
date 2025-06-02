@@ -1,5 +1,9 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import OpenAI from 'openai';
+import dotenv from 'dotenv';
+
+// Load environment variables from test.env
+dotenv.config({ path: 'test.env' });
 
 // System prompt that defines the AI's behavior
 const SYSTEM_PROMPT = `You are Jay Kilaparthi's AI assistant. You are an AI Engineer and M.S. Information Systems graduate with experience building real-world applications powered by large language models.
@@ -20,54 +24,37 @@ Instructions:
 - If asked about availability, mention being open to opportunities and provide email (jayakeerthk@gmail.com)
 - If asked about contact, provide email and LinkedIn (linkedin.com/in/jayvk)`;
 
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const { message } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ error: 'Message is required' });
+  }
+
   try {
-    const { message } = req.body;
-
-    if (!message) {
-      return res.status(400).json({ error: 'Message is required' });
-    }
-
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      console.error('OPENAI_API_KEY is not configured');
-      return res.status(500).json({ error: 'API configuration error' });
-    }
-
-    const openai = new OpenAI({
-      apiKey: apiKey
-    });
-
+    console.log('Sending request to OpenAI:', { message });
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: 'gpt-4',
       messages: [
-        {
-          role: "system",
-          content: SYSTEM_PROMPT
-        },
-        {
-          role: "user",
-          content: message
-        }
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: message },
       ],
-      temperature: 0.7,
-      max_tokens: 500
+      max_tokens: 500,
     });
 
-    const response = completion.choices[0]?.message?.content;
-    
-    if (response) {
-      return res.status(200).json({ response });
-    } else {
-      return res.status(500).json({ error: 'No response from AI' });
-    }
+    const response = completion.choices[0]?.message?.content || 'No response from AI';
+    console.log('OpenAI response:', response);
+    res.status(200).json({ response });
   } catch (error) {
-    console.error('Error in chat API:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Failed to get response from OpenAI' });
   }
 } 
