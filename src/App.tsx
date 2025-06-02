@@ -1,137 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaLinkedin, FaGithub, FaEnvelope, FaFileAlt, FaComments } from 'react-icons/fa';
+import { FaLinkedin, FaGithub, FaEnvelope, FaFileAlt } from 'react-icons/fa';
 import Chat from './components/Chat';
 import './App.css';
-
-// Resume context from PDF for Gemini API
-const resumeContext = `Jay Kilaparthi
-New York, NY | +1 (212) 729-5295 | jayakeerthk@gmail.com | www.linkedin.com/in/jayvk
-SUMMARY
-AI Engineer and M.S. Information Systems graduate with 2+ years of experience building real-world applications powered
-by large language models. Skilled in designing and developing AI tools across voice, messaging, and workflow automation
-using platforms like GPT-4, Supabase, and Vercel. Experienced in designing prompts, managing data pipelines, and
-developing backend systems. Delivered working prototypes used by real users and contributed to both frontend and
-backend development. Co-inventor on a published patent for AI fault detection in solar energy systems.
-EXPERIENCE
-AI Engineer | Hello Inbox | New York City
-​
-May 2025 – Present
-●​ Currently building a voice-first AI assistant that helps users manage their inbox by summarizing, prioritizing, and
-replying to emails using GPT-4o and Whisper.
-●​ Customized the open-source InboxZero backend to support email parsing, label logic, and real-time message
-summaries across devices.
-●​ Integrated Twilio to enable hands-free access to Gmail through voice and SMS, designed for users on the go.
-AI Engineer | Keeya | New York City
-Jan 2025 – May 2025
-●​ Developed a generative AI voice memory platform using ElevenLabs and GPT-4, enabling users to preserve and
-replay emotional voice messages with high fidelity.
-●​ Built and integrated backend services using Supabase and serverless functions to support voice upload, playback,
-and user session management.
-●​ Led fine-tuning experiments and testing cycles to enhance output quality and user satisfaction.
-Technical Teaching Assistant – Python for Data Analytics | Baruch College | New York City
-Sep 2024 – May 2025
-●​ Automated assignment grading workflows for 700+ submissions, reducing processing time by 50%.
-●​ Designed and implemented an ETL pipeline to extract student data, analyze Python coding submissions for
-accuracy, and re-upload to Brightspace, ensuring 95% accuracy and improving grading efficiency.
-●​ Assisted 150+ students in Python programming, focusing on data analysis and visualization.
-Growth & Data Lead | Patchly | New York City
-Oct 2024 – Mar 2025
-●​ Built MVP of a student event discovery app using Supabase, React, and serverless logic, supporting 300+ user
-sign-ups across CUNY campuses.
-●​ Analyzed data from 100+ user surveys and 50+ interviews increasing user engagement by 30%.
-●​ Managed multi-channel marketing campaigns (Instagram, email, on-campus) with A/B testing to optimize user
-acquisition, achieving a 40% increase in sign-ups.
-●​ Secured $1,250 in funding by presenting a compelling data-driven pitch at the CUNY New Venture Accelerator,
-showcasing the platform's potential.
-Fundraising Analytics Manager | Make a Difference | India
-June 2022 – Dec 2023
-●​ Led a team of 15 volunteers to implement data-driven fundraising strategies, exceeding goals by 20% and raising
-$12,000 to support educational programs for 100+ underprivileged kids in India.
-●​ Developed and maintained Power BI dashboards for real-time tracking of donations and volunteer contributions,
-identifying key trends to optimize fundraising strategies and improve donor retention by 15%.
-●​ Orchestrated 3 donor events, with targeted emails to cultivate long-term relationships with 200+ donors,
-increasing recurring donations by 25%.
-EDUCATION
-M.S. Information Systems | Baruch College–Zicklin School of Business | New York City
-Jan 2024 – May 2025
-●​ Developed a predictive analytics model using Python to forecast Airbnb prices by analyzing correlations between
-crime rates, location, and amenities. Implemented Decision Trees and Random Forests to improve price accuracy
-and generated tourist safety scores for data-driven decision-making.
-●​ Conducted a strategic analysis of Baruch College's transition from Blackboard to Brightspace, evaluating potential
-challenges and impacts through stakeholder interviews and providing recommendations for seamless transition.
-SKILLS
-●​ Programming & Data: Python (Pandas, NumPy), SQL, JavaScript, HTML/CSS, Data Wrangling, API Integration
-●​ Cloud & Data Engineering: Supabase, Firebase, AWS (Lambda, S3), Vercel, REST APIs, Git
-●​ Data Analysis & Visualization: Power BI, Tableau, Alteryx, Excel, A/B Testing
-●​ AI & Applied Tools: Prompt Engineering, LLM Integration, Workflow Automation, GPT API, Whisper, ElevenLabs`;
-
-// LinkedIn context for Gemini API
-const linkedInContext = {
-  profile: {
-    name: "Jay Kilaparthi",
-    headline: "AI Engineer | MS Information Systems | Builder",
-    location: "New York, NY",
-    connections: "500+",
-    about: "AI Engineer and M.S. Information Systems graduate with experience building real-world applications powered by large language models. Co-founded multiple AI startups including Keeya (voice memory platform) and EazyForms.ai (AI form assistant for international students).",
-    openToWork: true,
-    skills: [
-      "Python", "GPT-4", "Firebase", "Supabase", "SQL", "React", "AI Automation",
-      "Prompt Engineering", "Data Analysis", "Product Development"
-    ],
-    education: [
-      {
-        school: "Baruch College - Zicklin School of Business",
-        degree: "Master of Science - MS, Information Systems",
-        date: "2024 - 2025"
-      }
-    ],
-    experience: [
-      {
-        title: "AI Engineer",
-        company: "Hello Inbox",
-        date: "May 2025 - Present",
-        description: "Building a voice-first AI assistant for email management"
-      },
-      {
-        title: "AI Engineer",
-        company: "Keeya",
-        date: "Jan 2025 - May 2025",
-        description: "Developed a generative AI voice memory platform"
-      },
-      {
-        title: "Technical Teaching Assistant",
-        company: "Baruch College",
-        date: "Sep 2024 - May 2025",
-        description: "Python for Data Analytics"
-      }
-    ]
-  }
-};
 
 function App() {
   const [scrollY, setScrollY] = useState(0);
   const [showChat, setShowChat] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   
   // References for each landing element
   const nameRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const onelinerRef = useRef<HTMLParagraphElement>(null);
   const socialRef = useRef<HTMLDivElement>(null);
-
-  // Check if device is mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      const mobile = window.innerWidth <= 768;
-      setIsMobile(mobile);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   // Scroll detection
   useEffect(() => {
