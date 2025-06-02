@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaLinkedin, FaGithub, FaEnvelope, FaFileAlt } from 'react-icons/fa';
+import { FaLinkedin, FaGithub, FaEnvelope, FaFileAlt, FaComments } from 'react-icons/fa';
 import Chat from './components/Chat';
 import './App.css';
 
@@ -112,6 +112,7 @@ const linkedInContext = {
 function App() {
   const [scrollY, setScrollY] = useState(0);
   const [showChat, setShowChat] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
   // References for each landing element
   const nameRef = useRef<HTMLHeadingElement>(null);
@@ -119,21 +120,32 @@ function App() {
   const onelinerRef = useRef<HTMLParagraphElement>(null);
   const socialRef = useRef<HTMLDivElement>(null);
 
-  // Improved scroll detection
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Scroll detection
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       setScrollY(currentScrollY);
       
-      // Calculate trigger point based on viewport height
-      const triggerPoint = Math.max(window.innerHeight * 0.3, 200); // Minimum 200px trigger
+      const triggerPoint = Math.max(window.innerHeight * 0.3, 200);
       
       if (currentScrollY > triggerPoint) {
         if (!showChat) {
           setShowChat(true);
         }
         
-        // Apply fall animation to landing elements
         if (nameRef.current) nameRef.current.classList.add('fall-animation');
         if (subtitleRef.current) subtitleRef.current.classList.add('fall-animation');
         if (onelinerRef.current) onelinerRef.current.classList.add('fall-animation');
@@ -143,7 +155,6 @@ function App() {
           setShowChat(false);
         }
         
-        // Remove fall animation when scrolled back up
         if (nameRef.current) nameRef.current.classList.remove('fall-animation');
         if (subtitleRef.current) subtitleRef.current.classList.remove('fall-animation');
         if (onelinerRef.current) onelinerRef.current.classList.remove('fall-animation');
@@ -151,7 +162,6 @@ function App() {
       }
     };
 
-    // Add scroll event listener with passive option for better performance
     window.addEventListener('scroll', handleScroll, { passive: true });
     
     // Add initial scroll instruction
@@ -159,7 +169,15 @@ function App() {
       if (!showChat && window.scrollY < 10) {
         const scrollIndicator = document.createElement('div');
         scrollIndicator.className = 'scroll-indicator';
-        scrollIndicator.innerHTML = '↓ Scroll down to chat ↓';
+        scrollIndicator.innerHTML = '↓ Click or scroll to chat ↓';
+        scrollIndicator.style.cursor = 'pointer';
+        scrollIndicator.onclick = () => {
+          setShowChat(true);
+          if (nameRef.current) nameRef.current.classList.add('fall-animation');
+          if (subtitleRef.current) subtitleRef.current.classList.add('fall-animation');
+          if (onelinerRef.current) onelinerRef.current.classList.add('fall-animation');
+          if (socialRef.current) socialRef.current.classList.add('fall-animation');
+        };
         document.body.appendChild(scrollIndicator);
         
         setTimeout(() => {
