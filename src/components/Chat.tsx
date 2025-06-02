@@ -7,7 +7,11 @@ interface Message {
   sender: 'user' | 'ai';
 }
 
-const Chat: React.FC = () => {
+interface ChatProps {
+  resumeContext: string;
+}
+
+const Chat: React.FC<ChatProps> = ({ resumeContext }) => {
   const [messages, setMessages] = useState<Message[]>([
     { text: "Hi! I'm Jay's AI assistant. Ask me anything about my background, projects, or availability.", sender: 'ai' }
   ]);
@@ -15,32 +19,41 @@ const Chat: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
   }, [messages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || isLoading) return;
 
-    const userMessage: Message = { text: inputValue, sender: 'user' };
-    setMessages(prev => [...prev, userMessage]);
+    const userMessage = inputValue.trim();
     setInputValue('');
+    setMessages(prev => [...prev, { text: userMessage, sender: 'user' }]);
     setIsLoading(true);
 
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: inputValue }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: userMessage, context: resumeContext }),
       });
 
-      if (!response.ok) throw new Error('Failed to fetch response');
+      if (!response.ok) {
+        throw new Error('Failed to fetch response');
+      }
+
       const data = await response.json();
       setMessages(prev => [...prev, { text: data.response, sender: 'ai' }]);
     } catch (error) {
       console.error('Error:', error);
-      setMessages(prev => [...prev, { text: 'Sorry, something went wrong. Please try again.', sender: 'ai' }]);
+      setMessages(prev => [...prev, { text: 'Sorry, I encountered an error. Please try again.', sender: 'ai' }]);
     } finally {
       setIsLoading(false);
     }
