@@ -7,12 +7,27 @@ import './App.css';
 function App() {
   const [scrollY, setScrollY] = useState(0);
   const [showChat, setShowChat] = useState(false);
+  const [resumeContext, setResumeContext] = useState('');
   
   // References for each landing element
   const nameRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const onelinerRef = useRef<HTMLParagraphElement>(null);
   const socialRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchResumeContext = async () => {
+      try {
+        const response = await fetch('/JayKilaparthi-Resume.pdf');
+        const text = await response.text();
+        setResumeContext(text);
+      } catch (error) {
+        console.error('Error fetching resume context:', error);
+      }
+    };
+
+    fetchResumeContext();
+  }, []);
 
   // Scroll detection
   useEffect(() => {
@@ -129,7 +144,7 @@ function App() {
             transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
             <div className="container">
-              <Chat />
+              <Chat resumeContext={resumeContext} />
             </div>
           </motion.section>
         )}
