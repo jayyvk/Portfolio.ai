@@ -169,7 +169,7 @@ function App() {
       if (!showChat && window.scrollY < 10) {
         const scrollIndicator = document.createElement('div');
         scrollIndicator.className = 'scroll-indicator';
-        scrollIndicator.innerHTML = '↓ Click or scroll to chat ↓';
+        scrollIndicator.innerHTML = '↓ Click or scroll to chat with AI ↓';
         scrollIndicator.style.cursor = 'pointer';
         scrollIndicator.onclick = () => {
           setShowChat(true);
