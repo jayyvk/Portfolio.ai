@@ -178,7 +178,7 @@ function App() {
           >
             <h1 ref={nameRef} className="name landing-element name-element">jay kilaparthi.</h1>
             <p ref={subtitleRef} className="subtitle landing-element subtitle-element">builder · ai · nyc</p>
-            <p ref={onelinerRef} className="one-liner landing-element oneliner-element">baruch msis → keeya → eazyforms.ai</p>
+            <p ref={onelinerRef} className="one-liner landing-element oneliner-element">baruch ms is → patchly → ??</p>
             
             <div ref={socialRef} className="social-links landing-element social-element">
               <a href="https://linkedin.com/in/jayvk" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="LinkedIn">
