@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaPaperPlane } from 'react-icons/fa';
 
@@ -7,7 +7,11 @@ interface Message {
   sender: 'user' | 'ai';
 }
 
-export default function Chat() {
+interface ChatProps {
+  resumeContext: string;
+}
+
+const Chat: React.FC<ChatProps> = ({ resumeContext }) => {
   const [messages, setMessages] = useState<Message[]>([
     { text: "Hi! I'm Jay's AI assistant. Ask me anything about my background, projects, or availability.", sender: 'ai' }
   ]);
@@ -15,19 +19,21 @@ export default function Chat() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to bottom when new messages are added
-  useEffect(() => {
+  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
   }, [messages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || isLoading) return;
 
-    // Add user message
     const userMessage = inputValue.trim();
-    setMessages(prev => [...prev, { text: userMessage, sender: 'user' }]);
     setInputValue('');
+    setMessages(prev => [...prev, { text: userMessage, sender: 'user' }]);
     setIsLoading(true);
 
     try {
@@ -36,21 +42,18 @@ export default function Chat() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: userMessage }),
+        body: JSON.stringify({ message: userMessage, context: resumeContext }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to get response');
+        throw new Error('Failed to fetch response');
       }
 
       const data = await response.json();
       setMessages(prev => [...prev, { text: data.response, sender: 'ai' }]);
     } catch (error) {
       console.error('Error:', error);
-      setMessages(prev => [...prev, { 
-        text: "I'm having trouble connecting right now. Please try again later.", 
-        sender: 'ai' 
-      }]);
+      setMessages(prev => [...prev, { text: 'Sorry, I encountered an error. Please try again.', sender: 'ai' }]);
     } finally {
       setIsLoading(false);
     }
@@ -58,12 +61,13 @@ export default function Chat() {
 
   return (
     <div className="chat-container">
-      <div className="chat-messages">
+      <h2 className="chat-heading">Chat with Jay's AI</h2>
+      <div className="messages">
         <AnimatePresence>
           {messages.map((message, index) => (
             <motion.div
               key={index}
-              className={`message message-${message.sender}`}
+              className={`message ${message.sender}`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -73,39 +77,22 @@ export default function Chat() {
             </motion.div>
           ))}
         </AnimatePresence>
-        {isLoading && (
-          <motion.div
-            className="message message-ai"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            <div className="typing-indicator">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-          </motion.div>
-        )}
         <div ref={messagesEndRef} />
       </div>
-
-      <form onSubmit={handleSubmit} className="chat-input">
+      <form onSubmit={handleSubmit} className="input-form">
         <input
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Ask me anything..."
+          placeholder="Type a message..."
           disabled={isLoading}
         />
-        <motion.button
-          type="submit"
-          disabled={isLoading || !inputValue.trim()}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <FaPaperPlane size={16} />
-        </motion.button>
+        <button type="submit" disabled={isLoading || !inputValue.trim()}>
+          <FaPaperPlane />
+        </button>
       </form>
     </div>
   );
-} 
+};
+
+export default Chat; 
