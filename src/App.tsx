@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaLinkedin, FaGithub, FaEnvelope, FaFileAlt } from 'react-icons/fa';
+import { FaLinkedin, FaGithub, FaEnvelope, FaFileAlt, FaTwitter, FaComments } from 'react-icons/fa';
+import { Analytics } from '@vercel/analytics/react';
 import Chat from './components/Chat';
 import './App.css';
 
@@ -165,6 +166,7 @@ function App() {
 
   return (
     <div className="App">
+      <Analytics />
       <section className="landing-section">
         <div className="container">
           <motion.div
@@ -184,7 +186,7 @@ function App() {
               <a href="https://linkedin.com/in/jayvk" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="LinkedIn">
                 <FaLinkedin size={24} />
               </a>
-              <a href="https://github.com/jayakeerthk" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="GitHub">
+              <a href="https://github.com/jayyvk" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="GitHub">
                 <FaGithub size={24} />
               </a>
               <a href="mailto:jayakeerthk@gmail.com" className="social-link" aria-label="Email">
