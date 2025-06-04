@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaLinkedin, FaGithub, FaEnvelope, FaFileAlt, FaTwitter, FaComments } from 'react-icons/fa';
+import { FaLinkedin, FaGithub, FaEnvelope, FaFileAlt } from 'react-icons/fa';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import Chat from './components/Chat';
