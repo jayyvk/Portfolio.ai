@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaLinkedin, FaGithub, FaEnvelope, FaFileAlt, FaTwitter, FaComments } from 'react-icons/fa';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import Chat from './components/Chat';
 import './App.css';
 
@@ -167,6 +168,7 @@ function App() {
   return (
     <div className="App">
       <Analytics />
+      <SpeedInsights />
       <section className="landing-section">
         <div className="container">
           <motion.div
