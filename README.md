@@ -1,61 +1,34 @@
 # Jay Kilaparthi's Portfolio
 
-A modern, interactive portfolio website built with React, TypeScript, and Vite. Features an AI-powered chat interface using Google's Gemini API.
+A modern, interactive portfolio website that showcases my work, resume, and an AI-powered chat assistant trained on my background. Built with React, TypeScript, and OpenAI's GPT API.
 
-## Features
+## 🌟 Features
 
-- 🎨 Modern, responsive design
-- 💬 AI-powered chat interface
-- 🎭 Smooth animations and transitions
-- 📱 Mobile-first approach
-- 🔍 SEO friendly
-- ♿ Accessibility features
+- 🎨 Clean and responsive design
+- 💬 AI-powered chat interface trained on my resume and experience
+- 🎭 Smooth animations using Framer Motion
+- 📱 Mobile-first, fast performance
+- ♿ Accessibility-ready layout
 
-## Tech Stack
+## 🛠 Tech Stack
 
-- React
-- TypeScript
+- React + TypeScript
 - Vite
-- Framer Motion
-- Google Gemini API
 - Tailwind CSS
+- Framer Motion
+- OpenAI API
 
-## Getting Started
+## 💡 How It Works
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/portfolio.git
-cd portfolio
-```
+The website includes a landing page with my background and links, which transitions into a chat interface. The AI agent responds to questions about my projects, experience, and skills based on a system prompt crafted from my resume and portfolio.
 
-2. Install dependencies:
-```bash
-npm install
-```
+The AI is powered by OpenAI's GPT API. To run it locally, developers can integrate their own API key in a `.env` file.
 
-3. Start the development server:
-```bash
-npm run dev
-```
+## 📄 License
 
-4. Build for production:
-```bash
-npm run build
-```
+MIT License — feel free to use and adapt this project structure for your own portfolio.
 
-## Environment Variables
+## 🔗 Contact
 
-Create a `.env` file in the root directory and add your Gemini API key:
-```
-VITE_GEMINI_API_KEY=your_api_key_here
-```
-
-## License
-
-MIT License - feel free to use this code for your own portfolio!
-
-## Contact
-
-- Email: jayakeerthk@gmail.com
-- LinkedIn: [linkedin.com/in/jayvk](https://linkedin.com/in/jayvk)
-- GitHub: [github.com/jayakeerthk](https://github.com/jayakeerthk) 
+- [LinkedIn](https://linkedin.com/in/jayvk)
+- [GitHub](https://github.com/jayakeerthk)
