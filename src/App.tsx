@@ -183,7 +183,7 @@ function App() {
             <h1 ref={nameRef} className="name landing-element name-element">jay kilaparthi.</h1>
             <p ref={subtitleRef} className="subtitle landing-element subtitle-element">builder · ai · nyc</p>
             <p ref={onelinerRef} className="one-liner landing-element oneliner-element">
-              <a href="https://www.baruch.cuny.edu/" target="_blank" rel="noopener noreferrer" className="text-link">baruch ms is</a> → <a href="https://patchly.app" target="_blank" rel="noopener noreferrer" className="text-link">patchly</a> → ??
+              <a href="https://www.baruch.cuny.edu/" target="_blank" rel="noopener noreferrer" className="text-link">baruch ms is</a> → <a href="https://patchly.app" target="_blank" rel="noopener noreferrer" className="text-link">patchly</a> → <a href="https://keeya.app" target="_blank" rel="noopener noreferrer" className="text-link">keeya</a> → ??
             </p>
             
             <div ref={socialRef} className="social-links landing-element social-element">
