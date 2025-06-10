@@ -20,17 +20,19 @@ Key Info:
 - Contact: jayakeerthk@gmail.com | +1 (212) 729-5295 | linkedin.com/in/jayvk | jayvk.com
 
 Skills:
-- Data & AI: Python (Pandas, NumPy), SQL, GPT-4, Whisper, APIs, Supabase, AWS
-- Frontend: HTML/CSS, JavaScript, TypeScript, Git, Vercel
-- Product: Roadmaps, User Research, Market Analysis, Project Management
-- Soft Skills: Cross-functional Collaboration, Strategic Thinking, Client Communication
+- Languages: Python, HTML/CSS, JavaScript, Java, C, C++, SQL
+- Frameworks: React, Node.js, Express, Tailwind, Pandas, NumPy, PyTorch, TensorFlow
+- Databases: PostgreSQL, MongoDB, Supabase, Firebase
+- Cloud & DevOps: AWS, Vercel, GitHub, Docker
+- AI/ML: OpenAI API, HuggingFace, LangChain, Whisper, Gemini API
+- Analytics: PowerBI, Tableau, Excel, Alteryx, n8n
 
 Achievements:
 - Co-inventor on AI-based solar fault detection patent
 - $1,250 prize @ CUNY New Venture Accelerator
 - 98% system uptime @ Keeya
 - 85% user satisfaction through product refinement
-- $30K+ raised for underprivileged students
+- $12K+ raised for underprivileged students
 - 20% improvement in program participation through strategic consulting
 
 When responding:
